@@ -286,6 +286,7 @@ impl Node {
 
     fn to_wasm_record<V: WasmValue>(&self, ty: &V::Type, src: &str) -> Result<V, ParserError> {
         let values = self.as_record(src)?.collect::<BTreeMap<_, _>>();
+        // V::make_record expects fields in declaration order
         let record_fields = ty.record_fields().collect::<Vec<_>>();
         let fields = record_fields
             .iter()
@@ -377,11 +378,10 @@ impl Node {
     }
 
     fn to_wasm_flags<V: WasmValue>(&self, ty: &V::Type, src: &str) -> Result<V, ParserError> {
-        // Like `to_wasm_record`, produce the type's declaration order rather
-        // than whatever order the flags were collected in.
+        // V::make_flags expects flags in declaration order
         let names = ty.flags_names().collect::<Vec<_>>();
         let mut flags = self.as_flags(src)?.collect::<Vec<_>>();
-        flags.sort_by_key(|flag| names.iter().position(|name| name == flag));
+        flags.sort_by_cached_key(|flag| names.iter().position(|name| name == flag));
         V::make_flags(ty, flags).map_err(|err| self.wasm_value_error(err))
     }
 

@@ -114,8 +114,8 @@ pub trait WasmValue: Clone + Sized {
     }
     /// Returns a new WasmValue of the given type.
     ///
-    /// The fields provided by `fields` are not necessarily sorted; the callee
-    /// should perform sorting itself if needed.
+    /// The fields in `fields` must have the same relative ordering as
+    /// [`Self::Type`]'s `record_fields`.
     ///
     /// # Panics
     /// Panics if the type is not implemented (the trait default).
@@ -167,8 +167,8 @@ pub trait WasmValue: Clone + Sized {
     }
     /// Returns a new WasmValue of the given type.
     ///
-    /// The strings provided by `names` are not necessarily sorted; the callee
-    /// should perform sorting itself if needed.
+    /// The names in `names` must have the same relative ordering as
+    /// [`Self::Type`]'s `flag_names`.
     ///
     /// # Panics
     /// Panics if the type is not implemented (the trait default).

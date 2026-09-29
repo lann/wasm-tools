@@ -648,8 +648,6 @@ mod tests {
 
     #[test]
     fn parse_flags_in_type_order() {
-        // Keeps flags in the order `make_flags` gives them, like
-        // `wasmtime::component::Val` does, unlike `Value`, which sorts them.
         #[derive(Clone)]
         struct Flags(Vec<String>);
 

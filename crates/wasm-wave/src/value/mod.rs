@@ -303,20 +303,18 @@ impl WasmValue for Value {
         names: impl IntoIterator<Item = &'a str>,
     ) -> Result<Self, WasmValueError> {
         ensure_type_kind(ty, WasmTypeKind::Flags)?;
-        let flag_names = ty.flags_names().collect::<Vec<_>>();
-        let mut flags = names
-            .into_iter()
-            .map(|name| {
-                flag_names
-                    .iter()
-                    .position(|flag| flag == name)
-                    .ok_or_else(|| WasmValueError::UnknownCase(name.into()))
-            })
-            .collect::<Result<Vec<_>, WasmValueError>>()?;
-        // Flags values don't logically contain an ordering of the flags. Sort
-        // the flags values so that equivalent flags values compare equal.
-        flags.sort();
+        // `make_flags` requires `names` be in the same order as `flag_names`
         let ty = maybe_unwrap_type!(&ty.0, TypeEnum::Flags).unwrap().clone();
+        let mut flag_names = ty.flags.iter().enumerate();
+        let flags = names
+            .into_iter()
+            .map(
+                |name| match flag_names.find(|(_, flag_name)| flag_name.as_ref() == name) {
+                    Some((idx, _)) => Ok(idx),
+                    None => Err(WasmValueError::UnknownCase(name.into())),
+                },
+            )
+            .collect::<Result<Vec<_>, WasmValueError>>()?;
         Ok(Self(ValueEnum::Flags(Flags { ty, flags })))
     }
 
